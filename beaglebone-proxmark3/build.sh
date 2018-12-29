@@ -23,7 +23,6 @@ export PATH=${PATH}:${DEVKITARM}/bin
 
 # Cleanup source dir and pull latest
 make clean
-git pull
 
 # Set Build Environment
 sed -i 's/\$(shell uname -m)/armv7l/' client/Makefile
