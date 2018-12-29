@@ -1,13 +1,29 @@
 #!/bin/bash
 
-cd ~/
-# Do an initial git clone if /proxmark3/git doesn't contain a git repo
-[ ! -d proxmark3 ] && git clone https://github.com/Proxmark/proxmark3.git
+get_latest_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" |\
+    grep '"tag_name":' |\
+    sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+# Do pull latest git release
+wget -t 10 https://github.com/Proxmark/proxmark3/archive/`get_latest_release "Proxmark/proxmark3"`.tar.gz -O - |\
+    tar zxfv -
+
+# Pull Toolchanin
+wget -t 10 https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/8-2018q4/gcc-arm-none-eabi-8-2018-q4-major-linux.tar.bz2 -O - |\
+    tar xfvj - -C proxmark*
+
+# Setup Global Variables
+cd proxmark3*
+export DEVKITPRO=${PWD}
+export DEVKITARM=$DEVKITPRO/gcc-arm-none-eabi-8-2018-q4-major
+export PATH=${PATH}:${DEVKITARM}/bin
+
 
 # Cleanup source dir and pull latest
-cd proxmark3
 make clean
-git pull -u origin master
+git pull
 
 # Set Build Environment
 sed -i 's/\$(shell uname -m)/armv7l/' client/Makefile
@@ -18,5 +34,5 @@ make client
 # Create tarball
 GIT_VERSION=`git rev-parse --short HEAD`
 make tarbin
-mv ~/proxmark3/proxmark3-Linux-bin.tar /src
+mv $DEVKITPRO/proxmark3-Linux-bin.tar.gz /src
 echo -ne "\n\nBinaries will be locaed in /src\n\n"

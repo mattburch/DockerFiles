@@ -2,9 +2,11 @@ FROM ev3dev/debian-stretch-cross
 RUN sudo apt-get update && \
     DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes --no-install-recommends \
         git \
+        curl \
         libusb-dev:armhf \
         libreadline-dev:armhf \
         ncurses-dev:armhf \
+        libstdc++:armhf \
         libreadline7:armhf
 
 # Link Compilers
